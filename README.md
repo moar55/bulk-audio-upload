@@ -1,5 +1,8 @@
 # Bulk Upload Audio for Memrise
-This script uploads german audio for words that don't have any audio uploaded in any course to which you have editor access
+This script uploads german audio for words that don't have any audio uploaded in any course to which you have editor access.
+
+To use other languages change the value of `voice` int the `payload` dictionary to your desired language per the code here:
+https://soundoftext.com/docs#show-sound. You might find it nice to change the key `german_word` to your desired language :sweat_smile:.
 
 ## Set up
 This script has the following requirements:
