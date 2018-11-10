@@ -1,5 +1,5 @@
 # Bulk Upload Audio for Memrise
-This script uploads chinese audio for words that don't have any audio uploaded in any course to which you have editor access
+This script uploads german audio for words that don't have any audio uploaded in any course to which you have editor access
 
 ## Set up
 This script has the following requirements:
