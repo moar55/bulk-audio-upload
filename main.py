@@ -21,6 +21,7 @@ def get_audio_files_from_course(first_database_page, number_of_pages):
 	database_urls = []
 	for page in range(1, number_of_pages + 1):
 		database_urls.append(first_database_page + '?page=' + str(page))
+
 	pool = Pool(processes = 7)
 	pool.map(get_thing_information, database_urls)
 
@@ -33,14 +34,17 @@ def get_thing_information(database_url):
 	for div in div_elements:
 		thing_id = div.attrib['data-thing-id']
 		try:
-			chinese_word = div.xpath("td[2]/div/div/text()")[0]
+			german_word = div.xpath("td[2]/div/div/text()")[0]
+			print(german_word)
 		except IndexError:
 			print("failed to get the word of item with id " + str(thing_id) + ' on ' + str(database_url))
 			continue
 		column_number_of_audio = div.xpath("td[contains(@class, 'audio')]/@data-key")[0]
+		print(column_number_of_audio)
 		audio_files = div.xpath("td[contains(@class, 'audio')]/div/div[contains(@class, 'dropdown-menu')]/div")
 		number_of_audio_files = len(audio_files)
-		audios.append({'thing_id': thing_id, 'number_of_audio_files': number_of_audio_files, 'chinese_word': chinese_word, 'column_number_of_audio': column_number_of_audio})
+		audios.append({'thing_id': thing_id, 'number_of_audio_files': number_of_audio_files, 'german_word': german_word, 'column_number_of_audio': column_number_of_audio})
+	print(audios)
 	sequence_through_audios(audios)
 
 def download_audio(path):
@@ -60,15 +64,26 @@ def sequence_through_audios(audios):
 		if audio['number_of_audio_files'] > 0:
 			continue
 		else:
-			requests.post('http://soundoftext.com/sounds', data={'text':audio['chinese_word'], 'lang':'zh-CN'}) # warn the server of what file I'm going to need
-			temp_file = download_audio('http://soundoftext.com/static/sounds/zh-CN/' + audio['chinese_word'] + '.mp3') #download audio file
+			print(audio['german_word'])
+			payload = {
+				'engine': "Google",
+				"data": {
+					"text": audio['german_word'],
+					"voice": "de-DE"
+				}
+			}
+			print(payload)
+			audio_id = requests.post('https://api.soundoftext.com/sounds', json=payload).json()['id'] 
+			print(audio_id)
+			download_url = requests.get('https://api.soundoftext.com/sounds/' + audio_id).json()['location']
+			temp_file = download_audio(download_url) 
 			if isinstance(temp_file, str):
-				print(audio['chinese_word'] + ' skipped: ' + temp_file)
+				print(audio['german_word'] + ' skipped: ' + temp_file)
 				continue
 			else:
 				upload_file_to_server(audio['thing_id'], audio['column_number_of_audio'], course_database_url, temp_file)
 				temp_file.close()
-				print(audio['chinese_word'] + ' succeeded')
+				print(audio['german_word'] + ' succeeded')
 
 
 if __name__ == "__main__":
